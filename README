@@ -1,0 +1,5 @@
+*Description
+*Version:1.0
+*This is a active record framework for DotNET.
+*The idea comes from Castle ActiveRecord.
+*It only support SQLServer NOW!
