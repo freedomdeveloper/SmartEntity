@@ -3,3 +3,4 @@
 *This is a active record framework for DotNET.
 *The idea comes from Castle ActiveRecord.
 *It only support SQLServer NOW!
+*With simple setting on SmartEntity,it can help you to bulid your program more faster.It avoids much hand-written code.

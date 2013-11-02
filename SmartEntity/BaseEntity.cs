@@ -213,7 +213,7 @@ namespace SmartEntity
                     {
                         foreach (var column in _ColumnDict)
                         {
-                            if(dr[column.Value] != DBNull.Value)
+                            if(dr[column.Key] != DBNull.Value)
                                 _PiArray[column.Value].SetValue(this, dr[column.Key], null);
                         }
                         foreach (var fk in _ForeignKeyDict)
@@ -222,7 +222,7 @@ namespace SmartEntity
                             Type t = o.GetType();
                             PropertyInfo[] piArray = t.GetProperties();
                             int pkIndex = GetPrimaryKeyAttritubeIndex(piArray);
-                            piArray[pkIndex].SetValue(o, dr[fk.Value], null);
+                            piArray[pkIndex].SetValue(o, dr[fk.Key], null);
                         }
                     }
                 }
