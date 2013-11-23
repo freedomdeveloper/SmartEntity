@@ -27,6 +27,8 @@ namespace SmartEntity
 
         private static Dictionary<string, int> _PrimaryKeyDict = new Dictionary<string, int>();
 
+        private static Dictionary<string, PrimaryKeyType> _PrimaryKeyTypeDict = new Dictionary<string, PrimaryKeyType>();
+
         private static Dictionary<string, int> _ForeignKeyDict = new Dictionary<string, int>();
 
         #endregion
@@ -57,7 +59,10 @@ namespace SmartEntity
 
                 PrimaryKeyAttribute pkAttr = Attribute.GetCustomAttribute(_PiArray[i], typeof(PrimaryKeyAttribute)) as PrimaryKeyAttribute;
                 if (pkAttr != null)
+                {
                     _PrimaryKeyDict.Add(pkAttr.Name, i);
+                    _PrimaryKeyTypeDict.Add(pkAttr.Name, pkAttr.Type);
+                }
 
                 ForeignKeyAttribute fkAttr = Attribute.GetCustomAttribute(_PiArray[i], typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
                 if (fkAttr != null)
@@ -81,9 +86,9 @@ namespace SmartEntity
             string result = string.Empty;
             StringBuilder pkParameterStr = new StringBuilder();
             foreach(string pk in _PrimaryKeyDict.Keys)
-                pkParameterStr.Append(string.Format("{0}=@{0} AND",pk));
+                pkParameterStr.Append(string.Format("{0}=@{0} AND ",pk));
             result = pkParameterStr.ToString();
-            return result.Substring(0,result.Length - 3);
+            return result.Substring(0,result.Length - 4);
         }
 
         /// <summary>
@@ -97,8 +102,16 @@ namespace SmartEntity
                 SqlParameter parameter = new SqlParameter
                 {
                     ParameterName = string.Format("@{0}", pk.Key),
-                    Value = _PiArray[pk.Value].GetValue(this, null),
-                };
+                };              
+                if (_PrimaryKeyTypeDict[pk.Key] == PrimaryKeyType.Reference)
+                {
+                    object o = _PiArray[pk.Value].GetValue(this, null);
+                    PropertyInfo[] piArray = o.GetType().GetProperties();
+                    int pkIndex = GetPrimaryKeyAttritubeIndex(piArray);
+                    parameter.Value = piArray[pkIndex].GetValue(o, null);
+                }
+                else
+                    parameter.Value =  _PiArray[pk.Value].GetValue(this, null);
                 parameters.Add(parameter);
             }
         }
@@ -112,13 +125,12 @@ namespace SmartEntity
             foreach (var fk in _ForeignKeyDict)
             {
                 object o = _PiArray[fk.Value].GetValue(this, null);
-                Type t = o.GetType();
-                PropertyInfo[] piArray = t.GetProperties();
+                PropertyInfo[] piArray = o.GetType().GetProperties();
                 int pkIndex = GetPrimaryKeyAttritubeIndex(piArray);
 
                 SqlParameter parameter = new SqlParameter
                 {
-                    ParameterName = fk.Key,
+                    ParameterName = string.Format("@{0}", fk.Key),
                     Value = piArray[pkIndex].GetValue(o,null),
                 };
                 parameters.Add(parameter);
@@ -135,7 +147,7 @@ namespace SmartEntity
             {
                 SqlParameter parameter = new SqlParameter
                 {
-                    ParameterName = column.Key,
+                    ParameterName = string.Format("@{0}",column.Key),
                     Value = _PiArray[column.Value].GetValue(this,null),
                 };
                 parameters.Add(parameter);
@@ -240,6 +252,14 @@ namespace SmartEntity
             string columnStr;
             string parameterStr;
 
+            foreach (string pk in _PrimaryKeyDict.Keys)
+            {
+                if ((byte)_PrimaryKeyTypeDict[pk] >= (byte)PrimaryKeyType.NotAutoIncrease)
+                {
+                    columnStrBulieder.Append(string.Format("{0},", pk));
+                    parameterStrBulider.Append(string.Format("@{0},", pk));
+                }
+            }
             foreach (string fk in _ForeignKeyDict.Keys)
             {
                 columnStrBulieder.Append(string.Format("{0},", fk));
@@ -261,6 +281,7 @@ namespace SmartEntity
             List<SqlParameter> parameters = new List<SqlParameter>();
             AddForeignKeyParameter(parameters);
             AddColumnParameter(parameters);
+            AddPrimaryKeyParameter(parameters);
             SqlServerHelper.ExcuteSql(sqlStr, parameters);
         }
 
