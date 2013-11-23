@@ -8,7 +8,7 @@ namespace SmartEntity
 {
     internal static class SqlServerHelper
     {
-        private static readonly string CONNECTION_STRING = ConfigurationManager.ConnectionStrings["ConnectionString"].ToString();
+        private static readonly string CONNECTION_STRING = ConfigurationManager.ConnectionStrings["SmartEntityConnectionString"].ToString();
         
         /// <summary>
         /// Add parameters to cmd

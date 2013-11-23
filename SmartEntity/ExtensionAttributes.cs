@@ -1,11 +1,4 @@
-﻿#region About Me
-/*
- *Anthor: zxd 
- *Email: sher-lock@qq.com 
- *Last modify time: 2013-10-14
- */
-#endregion
-using System;
+﻿using System;
 
 namespace SmartEntity
 {
@@ -40,11 +33,16 @@ namespace SmartEntity
     {
         public string Name { get; set; }
 
+        public PrimaryKeyType Type { get; set; }
+
         private PrimaryKeyAttribute() { }
 
-        public PrimaryKeyAttribute(string name)
+        public PrimaryKeyAttribute(string name):this(name, PrimaryKeyType.AutoIncrease){ }
+
+        public PrimaryKeyAttribute(string name, PrimaryKeyType type)
         {
             Name = name;
+            Type = type;
         }
     }
 
