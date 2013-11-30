@@ -1,6 +1,16 @@
-*Description
+DECSRIPTION
 *Contract email:sher-lock@qq.com
 *This is a active record framework for DotNET.
 *The idea comes from Castle ActiveRecord.
 *It only support SQLServer NOW!
 *With simple setting on SmartEntity,it can help you to bulid your program more faster.It avoids much hand-written code. 
+
+BEFORE USE
+*Open YOUR default config file(app.config or web.config), add the code as follow:
+ <configuration>
+   <connectionStrings>
+     <add connectionString="" name="SmartEntityConnectionString"/>
+   </connectionStrings>
+ </configuration>
+ Remeber to add YOUR own database connectionString.
+*If YOU want to run the demo, please excute the sql script in ConsoleApp /AppData/SQL-Server/CreateDatabase.sql, and modify the app.config to connect to your SQL-Server too.
